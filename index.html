@@ -3,36 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>我慢記録 - オンボーディング</title>
+    <title>我慢記録 - 完全版</title>
 
     <style>
         :root { --main-bg: #ffffff; --sub-bg: #f8f9fa; --border-color: #dee2e6; --primary-btn: #28a745; --quick-btn: #f1f3f5; --text-color: #212529; --overlay-bg: rgba(0,0,0,0.8); }
-        
         body { font-family: -apple-system, sans-serif; background-color: #ececec; margin: 0; padding: 15px 10px; color: var(--text-color); }
         .app-container { background: var(--main-bg); border-radius: 12px; max-width: 400px; margin: 0 auto; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.1); min-height: 500px; display: flex; flex-direction: column; }
-        
         .header { background: #343a40; color: white; padding: 15px; font-weight: bold; text-align: center; font-size: 1.1rem; }
         .content { padding: 20px; flex-grow: 1; }
         .hidden { display: none; }
-
         button { width: 100%; padding: 16px; border-radius: 8px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-main { background-color: var(--primary-btn); color: white; }
         .btn-sub { background-color: #6c757d; color: white; }
         .btn-outline { background-color: transparent; border: 2px solid var(--border-color); color: #666; font-size: 0.9rem; }
-
         .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .btn-quick { background: var(--quick-btn); border: 2px solid var(--border-color); padding: 15px 10px; border-radius: 8px; font-weight: bold; cursor: pointer; text-align: center; }
         .btn-quick span { display: block; font-size: 0.75rem; color: #777; font-weight: normal; }
-
         .progress-container { background: #eee; border-radius: 10px; height: 20px; width: 100%; margin: 15px 0; overflow: hidden; }
         .progress-bar { background: var(--primary-btn); height: 100%; width: 0%; transition: width 0.5s ease; }
-        
         .btn-del-item { width: auto; padding: 5px 8px; margin: 0; background: #ffeded; color: #dc3545; font-size: 0.7rem; border-radius: 4px; font-weight: bold; }
-        
         .setting-group { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f1f1f1; }
         .setting-label { font-size: 0.8rem; font-weight: bold; color: #666; margin-bottom: 5px; display: block; }
 
-        /* ★新機能：オンボーディングオーバーレイ */
+        /* オンボーディング */
         .onboarding-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay-bg); color: white; z-index: 2000; display: flex; justify-content: center; align-items: center; }
         .onboarding-card { background: white; color: var(--text-color); border-radius: 16px; padding: 30px; width: 85%; max-width: 320px; text-align: center; }
         .how-to-step { display: flex; align-items: flex-start; gap: 15px; text-align: left; margin-bottom: 20px; }
@@ -44,38 +37,15 @@
 <div id="onboardingPage" class="onboarding-overlay hidden">
     <div class="onboarding-card">
         <h2 style="margin-top:0; color:var(--primary-btn);">我慢貯金の使いかた</h2>
-        
-        <div class="how-to-step">
-            <div class="step-icon">1</div>
-            <div>
-                <strong>我慢するアイテムを決める</strong>
-                <p style="font-size:0.8rem; color:#666; margin: 5px 0;">「設定」から、スタバやコンビニなど、よく我慢するものをボタンとして登録します。</p>
-            </div>
-        </div>
-
-        <div class="how-to-step">
-            <div class="step-icon">2</div>
-            <div>
-                <strong>我慢したらタップする</strong>
-                <p style="font-size:0.8rem; color:#666; margin: 5px 0;">ホーム画面に並んだボタンをタップすると、その金額が貯金されます。</p>
-            </div>
-        </div>
-
-        <div class="how-to-step">
-            <div class="step-icon">3</div>
-            <div>
-                <strong>目標達成を目指す</strong>
-                <p style="font-size:0.8rem; color:#666; margin: 5px 0;">「集計・進捗」で、目標金額までの達成率を確認。履歴の押し間違いは✕で消せます。</p>
-            </div>
-        </div>
-
+        <div class="how-to-step"><div class="step-icon">1</div><div><strong>アイテムを決める</strong><p style="font-size:0.8rem; color:#666; margin: 5px 0;">「設定」から、よく我慢するものをボタンとして登録。</p></div></div>
+        <div class="how-to-step"><div class="step-icon">2</div><div><strong>我慢したらタップ</strong><p style="font-size:0.8rem; color:#666; margin: 5px 0;">ボタンを押すだけで金額が記録されます。</p></div></div>
+        <div class="how-to-step"><div class="step-icon">3</div><div><strong>目標を追う</strong><p style="font-size:0.8rem; color:#666; margin: 5px 0;">「進捗」で達成率をチェック。ミスは✕で削除。</p></div></div>
         <button class="btn-main" onclick="finishOnboarding()">はじめる</button>
     </div>
 </div>
 
 <div class="app-container">
     <div class="header" id="pageTitle">我慢を登録</div>
-    
     <div class="content">
         <div id="page1">
             <div class="quick-grid" id="quickButtonsArea"></div>
@@ -83,15 +53,12 @@
             <button class="btn-sub" onclick="showPage('page3')">集計・進捗</button>
             <button class="btn-outline" onclick="showPage('page4')">設定</button>
         </div>
-
         <div id="page2" class="hidden" style="text-align: center;">
             <div style="font-size: 5rem; color: var(--primary-btn); margin: 20px 0;">✔️</div>
-            <h2 id="saveMsgTitle">登録完了</h2>
-            <p id="saveMsgBody" style="color: #666;"></p>
+            <h2 id="saveMsgTitle">登録完了</h2><p id="saveMsgBody" style="color: #666;"></p>
             <button class="btn-main" onclick="showPage('page1')">続けて登録</button>
             <button class="btn-sub" onclick="showPage('page5')">履歴を確認</button>
         </div>
-
         <div id="page3" class="hidden">
             <div style="background:#f8f9fa; padding:20px; border-radius:8px; text-align:center; border:1px solid #ddd; margin-bottom:10px;">
                 <span style="font-size:0.9rem; color:#666;">累計貯金額</span>
@@ -99,28 +66,21 @@
             </div>
             <div id="targetSection" style="padding: 10px;">
                 <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:bold;">
-                    <span>目標：<span id="displayTarget">0</span>円</span>
-                    <span>あと <span id="displayRemaining">0</span>円</span>
+                    <span>目標：<span id="displayTarget">0</span>円</span><span>あと <span id="displayRemaining">0</span>円</span>
                 </div>
                 <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
                 <p style="text-align:center; font-weight:bold; color:#555;">達成率: <span id="progressPercent">0</span>%</p>
             </div>
             <button class="btn-sub" onclick="showPage('page1')">戻る</button>
         </div>
-
         <div id="page4" class="hidden">
-            <div class="setting-group"><label class="setting-label">🎯 目標金額を設定</label><div style="display:flex; gap:10px;"><input type="number" id="targetInput" placeholder="例: 50000" style="flex:1; padding:12px; border:1px solid #ddd; border-radius:6px;"><button class="btn-main" onclick="updateTarget()" style="width:auto; margin:0; padding:10px 20px;">設定</button></div></div>
-            <div class="setting-group"><label class="setting-label">＋ ボタンを追加</label><input type="text" id="newBtnName" placeholder="名前 (例: コンビニ)" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:6px; box-sizing:border-box;"><input type="number" id="newBtnAmount" placeholder="金額" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:6px; box-sizing:border-box;"><button class="btn-main" onclick="addQuickButton()">ボタンを追加</button></div>
+            <div class="setting-group"><label class="setting-label">🎯 目標金額を設定</label><div style="display:flex; gap:10px;"><input type="number" id="targetInput" style="flex:1; padding:12px; border:1px solid #ddd; border-radius:6px;"><button class="btn-main" onclick="updateTarget()" style="width:auto; margin:0; padding:10px 20px;">設定</button></div></div>
+            <div class="setting-group"><label class="setting-label">＋ ボタンを追加</label><input type="text" id="newBtnName" placeholder="名前" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:6px;"><input type="number" id="newBtnAmount" placeholder="金額" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:6px;"><button class="btn-main" onclick="addQuickButton()">ボタンを追加</button></div>
             <label class="setting-label">ボタンの管理</label><div id="manageListArea" style="margin-bottom:20px;"></div>
             <button class="btn-sub" onclick="showPage('page1')">戻る</button>
         </div>
-
         <div id="page5" class="hidden">
-            <div class="filter-tab">
-                <button class="btn-tab active" id="tabDay" onclick="renderHistory('day')">今日</button>
-                <button class="btn-tab" id="tabWeek" onclick="renderHistory('week')">1週間</button>
-                <button class="btn-tab" id="tabMonth" onclick="renderHistory('month')">1ヶ月</button>
-            </div>
+            <div class="filter-tab"><button class="btn-tab active" id="tabDay" onclick="renderHistory('day')">今日</button><button class="btn-tab" id="tabWeek" onclick="renderHistory('week')">1週間</button><button class="btn-tab" id="tabMonth" onclick="renderHistory('month')">1ヶ月</button></div>
             <div class="history-scroll" id="historyListArea"></div>
             <div style="margin-top:15px; text-align:right; font-weight:bold;">期間合計: <span id="periodTotal" style="color:var(--primary-btn); font-size:1.2rem;">0</span>円</div>
             <button class="btn-sub" onclick="showPage('page1')" style="margin-top:20px;">メインに戻る</button>
@@ -135,29 +95,104 @@
     let quickButtons = JSON.parse(localStorage.getItem('myQuickButtons')) || [{ name: 'スタバ', amount: 650 }, { name: 'コンビニ', amount: 300 }];
     let currentPeriod = 'day';
 
-    // ★新機能：オンボーディングロジック
-    // 「使いかたをまだ見ていない」場合だけ表示する
+    // 起動時のオンボーディング判定
     if (!localStorage.getItem('gamanOnboardingSeen')) {
         document.getElementById('onboardingPage').classList.remove('hidden');
     }
 
     function finishOnboarding() {
-        // 「見た」ことをLocalStorageに保存
         localStorage.setItem('gamanOnboardingSeen', 'true');
         document.getElementById('onboardingPage').classList.add('hidden');
-        showPage('page1'); // メインページへ
+        showPage('page1');
     }
 
-    // 既存の関数（ Ver 12.0と同じなので省略しますが、ここには入っています）
-    function showPage(pageId) { document.querySelectorAll('.content > div').forEach(div => div.classList.add('hidden')); document.getElementById(pageId).classList.remove('hidden'); const titles = { page1:"我慢登録", page2:"完了", page3:"進捗状況", page4:"設定", page5:"履歴一覧" }; document.getElementById('pageTitle').innerText = titles[pageId]; if(pageId === 'page1') renderQuickButtons(); if(pageId === 'page3') updateProgressUI(); if(pageId === 'page4') { document.getElementById('targetInput').value = targetAmount; renderManageList(); } if(pageId === 'page5') renderHistory(currentPeriod); }
-    function updateTarget() { const val = parseInt(document.getElementById('targetInput').value) || 0; targetAmount = val; localStorage.setItem('myTargetAmount', targetAmount); alert("目標金額を設定しました！"); showPage('page3'); }
-    function updateProgressUI() { document.getElementById('grandTotal').innerText = total.toLocaleString() + "円"; document.getElementById('displayTarget').innerText = targetAmount.toLocaleString(); const remaining = Math.max(0, targetAmount - total); document.getElementById('displayRemaining').innerText = remaining.toLocaleString(); let percent = 0; if(targetAmount > 0) { percent = Math.min(100, Math.floor((total / targetAmount) * 100)); } document.getElementById('progressPercent').innerText = percent; document.getElementById('progressBar').style.width = percent + "%"; }
-    function renderHistory(period) { currentPeriod = period; document.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active')); document.getElementById('tab' + period.charAt(0).toUpperCase() + period.slice(1)).classList.add('active'); const now = new Date(); let filtered = history.filter(i => { const date = new Date(i.timestamp); if (period === 'day') return date.toDateString() === now.toDateString(); if (period === 'week') return i.timestamp >= (now.getTime() - 7*24*60*60*1000); if (period === 'month') return i.timestamp >= (now.getTime() - 30*24*60*60*1000); }); const area = document.getElementById('historyListArea'); document.getElementById('periodTotal').innerText = filtered.reduce((s, i) => s + i.amount, 0).toLocaleString(); area.innerHTML = filtered.map(i => ` <div class="history-item"> <div> <span class="item-date">${new Date(i.timestamp).toLocaleString('ja-JP', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'})}</span> <span style="font-weight:bold;">${i.name}</span> </div> <div style="display:flex; align-items:center; gap:10px;"> <div style="color:var(--primary-btn); font-weight:bold;">+${i.amount}円</div> <button class="btn-del-item" onclick="deleteHistoryItem(${i.timestamp})">✕</button> </div> </div> `).join('') || '<p style="text-align:center; color:#ccc; margin-top:50px;">記録がありません</p>'; }
-    function deleteHistoryItem(timestamp) { if(!confirm("削除しますか？")) return; const idx = history.findIndex(i => i.timestamp === timestamp); if (idx > -1) { total -= history[idx].amount; history.splice(idx, 1); localStorage.setItem('mySavingTotal', total); localStorage.setItem('mySavingHistory', JSON.stringify(history)); renderHistory(currentPeriod); } }
-    function renderQuickButtons() { const area = document.getElementById('quickButtonsArea'); area.innerHTML = quickButtons.map(btn => ` <div class="btn-quick" onclick="saveData('${btn.name}', ${btn.amount})"> ${btn.name}<span>${btn.amount}円</span> </div> `).join(''); }
-    function saveData(name, amount) { total += amount; history.unshift({ name, amount, timestamp: new Date().getTime() }); localStorage.setItem('mySavingTotal', total); localStorage.setItem('mySavingHistory', JSON.stringify(history)); document.getElementById('saveMsgBody').innerText = `${name} (${amount}円)`; showPage('page2'); }
-    function renderManageList() { const area = document.getElementById('manageListArea'); area.innerHTML = quickButtons.map((btn, idx) => ` <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee; font-size:0.9rem;"> <span>${btn.name} (${btn.amount}円)</span> <button onclick="deleteBtn(${idx})" style="width:auto; padding:5px 10px; margin:0; background:#dc3545; color:#fff; font-size:0.7rem;">削除</button> </div> `).join(''); }
-    function addQuickButton() { const n = document.getElementById('newBtnName').value; const a = parseInt(document.getElementById('newBtnAmount').value); if(!n || !a) return; quickButtons.push({name:n, amount:a}); localStorage.setItem('myQuickButtons', JSON.stringify(quickButtons)); document.getElementById('newBtnName').value = ""; document.getElementById('newBtnAmount').value = ""; renderManageList(); }
+    function showPage(pageId) {
+        document.querySelectorAll('.content > div').forEach(div => div.classList.add('hidden'));
+        document.getElementById(pageId).classList.remove('hidden');
+        const titles = { page1:"我慢登録", page2:"完了", page3:"進捗状況", page4:"設定", page5:"履歴一覧" };
+        document.getElementById('pageTitle').innerText = titles[pageId];
+        if(pageId === 'page1') renderQuickButtons();
+        if(pageId === 'page3') updateProgressUI();
+        if(pageId === 'page4') { document.getElementById('targetInput').value = targetAmount; renderManageList(); }
+        if(pageId === 'page5') renderHistory(currentPeriod);
+    }
+
+    function updateTarget() {
+        const val = parseInt(document.getElementById('targetInput').value) || 0;
+        targetAmount = val;
+        localStorage.setItem('myTargetAmount', targetAmount);
+        updateProgressUI();
+        alert("目標金額を設定しました！");
+        showPage('page3');
+    }
+
+    function updateProgressUI() {
+        document.getElementById('grandTotal').innerText = total.toLocaleString() + "円";
+        document.getElementById('displayTarget').innerText = targetAmount.toLocaleString();
+        const remaining = Math.max(0, targetAmount - total);
+        document.getElementById('displayRemaining').innerText = remaining.toLocaleString();
+        let percent = (targetAmount > 0) ? Math.min(100, Math.floor((total / targetAmount) * 100)) : 0;
+        document.getElementById('progressPercent').innerText = percent;
+        document.getElementById('progressBar').style.width = percent + "%";
+    }
+
+    function renderHistory(period) {
+        currentPeriod = period;
+        document.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab' + period.charAt(0).toUpperCase() + period.slice(1)).classList.add('active');
+        const now = new Date();
+        let filtered = history.filter(i => {
+            const date = new Date(i.timestamp);
+            if (period === 'day') return date.toDateString() === now.toDateString();
+            if (period === 'week') return i.timestamp >= (now.getTime() - 7*24*60*60*1000);
+            if (period === 'month') return i.timestamp >= (now.getTime() - 30*24*60*60*1000);
+        });
+        const area = document.getElementById('historyListArea');
+        document.getElementById('periodTotal').innerText = filtered.reduce((s, i) => s + i.amount, 0).toLocaleString();
+        area.innerHTML = filtered.map(i => `
+            <div class="history-item">
+                <div><span class="item-date">${new Date(i.timestamp).toLocaleString('ja-JP', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'})}</span><span style="font-weight:bold;">${i.name}</span></div>
+                <div style="display:flex; align-items:center; gap:10px;"><div style="color:var(--primary-btn); font-weight:bold;">+${i.amount}円</div><button class="btn-del-item" onclick="deleteHistoryItem(${i.timestamp})">✕</button></div>
+            </div>
+        `).join('') || '<p style="text-align:center; color:#ccc; margin-top:50px;">記録がありません</p>';
+    }
+
+    function deleteHistoryItem(timestamp) {
+        if(!confirm("削除しますか？")) return;
+        const idx = history.findIndex(i => i.timestamp === timestamp);
+        if (idx > -1) { total -= history[idx].amount; history.splice(idx, 1); localStorage.setItem('mySavingTotal', total); localStorage.setItem('mySavingHistory', JSON.stringify(history)); renderHistory(currentPeriod); }
+    }
+
+    function renderQuickButtons() {
+        const area = document.getElementById('quickButtonsArea');
+        area.innerHTML = quickButtons.map(btn => `<div class="btn-quick" onclick="saveData('${btn.name}', ${btn.amount})">${btn.name}<span>${btn.amount}円</span></div>`).join('');
+    }
+
+    function saveData(name, amount) {
+        total += amount;
+        history.unshift({ name, amount, timestamp: new Date().getTime() });
+        localStorage.setItem('mySavingTotal', total);
+        localStorage.setItem('mySavingHistory', JSON.stringify(history));
+        document.getElementById('saveMsgBody').innerText = `${name} (${amount}円)`;
+        showPage('page2');
+    }
+
+    function renderManageList() {
+        const area = document.getElementById('manageListArea');
+        area.innerHTML = quickButtons.map((btn, idx) => `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee; font-size:0.9rem;"><span>${btn.name} (${btn.amount}円)</span><button onclick="deleteBtn(${idx})" style="width:auto; padding:5px 10px; margin:0; background:#dc3545; color:#fff; font-size:0.7rem;">削除</button></div>`).join('');
+    }
+
+    function addQuickButton() {
+        const n = document.getElementById('newBtnName').value;
+        const a = parseInt(document.getElementById('newBtnAmount').value);
+        if(!n || !a) return;
+        quickButtons.push({name:n, amount:a});
+        localStorage.setItem('myQuickButtons', JSON.stringify(quickButtons));
+        document.getElementById('newBtnName').value = "";
+        document.getElementById('newBtnAmount').value = "";
+        renderManageList();
+    }
+
     function deleteBtn(idx) { quickButtons.splice(idx, 1); localStorage.setItem('myQuickButtons', JSON.stringify(quickButtons)); renderManageList(); }
 
     showPage('page1');
