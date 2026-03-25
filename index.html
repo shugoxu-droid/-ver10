@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>我慢記録 - Ver 14.0</title>
+    <title>我慢記録 - Ver 15.0</title>
     <style>
         :root { --main-bg: #ffffff; --sub-bg: #f8f9fa; --border-color: #dee2e6; --primary-btn: #28a745; --quick-btn: #f1f3f5; --text-color: #212529; --overlay-bg: rgba(0,0,0,0.8); }
         body { font-family: -apple-system, sans-serif; background-color: #ececec; margin: 0; padding: 15px 10px; color: var(--text-color); }
@@ -20,8 +20,16 @@
         .btn-quick span { display: block; font-size: 0.75rem; color: #777; font-weight: normal; }
         .progress-container { background: #eee; border-radius: 10px; height: 20px; width: 100%; margin: 15px 0; overflow: hidden; }
         .progress-bar { background: var(--primary-btn); height: 100%; width: 0%; transition: width 0.5s ease; }
-        .btn-del-item { width: auto; padding: 5px 8px; margin: 0; background: #ffeded; color: #dc3545; font-size: 0.7rem; border-radius: 4px; font-weight: bold; }
         
+        /* 履歴アイテムのスタイル調整 */
+        .history-item { padding: 12px 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .item-info { display: flex; flex-direction: column; }
+        .item-date { font-size: 0.7rem; color: #888; margin-bottom: 2px; }
+        .item-name { font-weight: bold; font-size: 0.95rem; }
+        .item-right { display: flex; align-items: center; gap: 8px; }
+        .item-amount { color: var(--primary-btn); font-weight: bold; }
+        .btn-del-mini { background: #fdf2f2; color: #dc3545; border: 1px solid #fee2e2; padding: 4px 8px; font-size: 0.7rem; width: auto; margin: 0; border-radius: 4px; }
+
         /* オンボーディング */
         .onboarding-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay-bg); color: white; z-index: 2000; display: flex; justify-content: center; align-items: center; }
         .onboarding-card { background: white; color: var(--text-color); border-radius: 16px; padding: 30px; width: 85%; max-width: 320px; text-align: center; }
@@ -49,7 +57,7 @@
 
         <div id="page2" class="hidden" style="text-align:center;">
             <div style="font-size:5rem; color:var(--primary-btn); margin:20px 0;">✔️</div>
-            <h2 id="saveMsgTitle">登録完了</h2>
+            <h2>登録完了</h2>
             <p id="saveMsgBody" style="color:#666;"></p>
             <button class="btn-main" onclick="showPage('page1')">続けて登録</button>
         </div>
@@ -94,15 +102,14 @@
                 <button class="btn-tab" onclick="renderHistory('week')">1週間</button>
                 <button class="btn-tab" onclick="renderHistory('month')">1ヶ月</button>
             </div>
-            <div id="historyListArea" style="height:250px; overflow-y:auto; border:1px solid #eee; background:#fff;"></div>
-            <div style="text-align:right; font-weight:bold; margin-top:10px;">合計: <span id="periodTotal">0</span>円</div>
+            <div id="historyListArea" style="height:280px; overflow-y:auto; border:1px solid #eee; background:#fff; border-radius:8px;"></div>
+            <div style="text-align:right; font-weight:bold; margin-top:10px;">期間合計: <span id="periodTotal">0</span>円</div>
             <button class="btn-sub" onclick="showPage('page1')" style="margin-top:20px;">戻る</button>
         </div>
     </div>
 </div>
 
 <script>
-    // データ初期化
     let total = parseInt(localStorage.getItem('mySavingTotal')) || 0;
     let targetAmount = parseInt(localStorage.getItem('myTargetAmount')) || 0;
     let history = JSON.parse(localStorage.getItem('mySavingHistory')) || [];
@@ -111,13 +118,9 @@
         { name: 'コンビニ', amount: 300 }
     ];
 
-    // 画面切り替え（絶対動くシンプル版）
     function showPage(pageId) {
         const ids = ['page1', 'page2', 'page3', 'page4', 'page5'];
-        ids.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.classList.add('hidden');
-        });
+        ids.forEach(id => document.getElementById(id).classList.add('hidden'));
         document.getElementById(pageId).classList.remove('hidden');
 
         if(pageId === 'page1') renderQuickButtons();
@@ -126,7 +129,6 @@
         if(pageId === 'page5') renderHistory('day');
     }
 
-    // オンボーディング
     function finishOnboarding() {
         localStorage.setItem('gamanOnboardingSeen', 'true');
         document.getElementById('onboardingPage').classList.add('hidden');
@@ -148,6 +150,7 @@
         document.getElementById('progressBar').style.width = percent + "%";
     }
 
+    // ★今回のメイン修正：日付と時間のフォーマット表示
     function renderHistory(period) {
         const now = new Date();
         const filtered = history.filter(i => {
@@ -156,16 +159,33 @@
             if(period === 'week') return i.timestamp >= (now.getTime() - 7*24*60*60*1000);
             return i.timestamp >= (now.getTime() - 30*24*60*60*1000);
         });
+
         document.getElementById('periodTotal').innerText = filtered.reduce((s,i)=>s+i.amount,0).toLocaleString();
-        document.getElementById('historyListArea').innerHTML = filtered.map(i => `
-            <div style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
-                <span>${i.name}</span>
-                <span>+${i.amount}円 <button onclick="deleteItem(${i.timestamp})" style="width:auto; padding:2px 5px; margin:0; background:#eee;">✕</button></span>
-            </div>
-        `).join('') || '記録なし';
+        
+        const area = document.getElementById('historyListArea');
+        area.innerHTML = filtered.map(i => {
+            // 日付を「3/25 21:40」のような形式に変換
+            const dateStr = new Date(i.timestamp).toLocaleString('ja-JP', {
+                month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+
+            return `
+                <div class="history-item">
+                    <div class="item-info">
+                        <span class="item-date">${dateStr}</span>
+                        <span class="item-name">${i.name}</span>
+                    </div>
+                    <div class="item-right">
+                        <span class="item-amount">+${i.amount}円</span>
+                        <button class="btn-del-mini" onclick="deleteItem(${i.timestamp})">✕</button>
+                    </div>
+                </div>
+            `;
+        }).join('') || '<p style="text-align:center; color:#ccc; margin-top:50px;">記録なし</p>';
     }
 
     function deleteItem(ts) {
+        if(!confirm("削除しますか？")) return;
         const idx = history.findIndex(i => i.timestamp === ts);
         if(idx > -1) {
             total -= history[idx].amount;
@@ -193,19 +213,27 @@
 
     function renderManageList() {
         document.getElementById('manageListArea').innerHTML = quickButtons.map((btn, idx) => `
-            <div style="display:flex; justify-content:space-between; padding:5px;"><span>${btn.name}</span><button onclick="delBtn(${idx})" style="width:auto; padding:2px 5px;">削除</button></div>
+            <div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid #eee; font-size:0.9rem;">
+                <span>${btn.name}</span>
+                <button onclick="delBtn(${idx})" style="width:auto; padding:2px 8px;">削除</button>
+            </div>
         `).join('');
     }
 
     function addQuickButton() {
         const n = document.getElementById('newBtnName').value;
         const a = parseInt(document.getElementById('newBtnAmount').value);
-        if(n && a) { quickButtons.push({name:n, amount:a}); localStorage.setItem('myQuickButtons', JSON.stringify(quickButtons)); showPage('page4'); }
+        if(n && a) { 
+            quickButtons.push({name:n, amount:a}); 
+            localStorage.setItem('myQuickButtons', JSON.stringify(quickButtons)); 
+            document.getElementById('newBtnName').value = "";
+            document.getElementById('newBtnAmount').value = "";
+            renderManageList();
+        }
     }
 
     function delBtn(idx) { quickButtons.splice(idx, 1); localStorage.setItem('myQuickButtons', JSON.stringify(quickButtons)); renderManageList(); }
 
-    // 起動！
     if (!localStorage.getItem('gamanOnboardingSeen')) {
         document.getElementById('onboardingPage').classList.remove('hidden');
     }
