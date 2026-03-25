@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>我慢記録 - 履歴特化</title>
+    <style>
+        :root { --main-bg: #ffffff; --sub-bg: #f8f9fa; --border-color: #dee2e6; --primary-btn: #28a745; --quick-btn: #f1f3f5; --text-color: #212529; }
+        
+        body { font-family: -apple-system, sans-serif; background-color: #ececec; margin: 0; padding: 15px 10px; color: var(--text-color); }
+        .app-container { background: var(--main-bg); border-radius: 12px; max-width: 400px; margin: 0 auto; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.1); min-height: 500px; display: flex; flex-direction: column; }
+        
+        .header { background: #343a40; color: white; padding: 15px; font-weight: bold; text-align: center; font-size: 1.1rem; }
+        .content { padding: 20px; flex-grow: 1; }
+        .hidden { display: none; }
+
+        button { width: 100%; padding: 16px; border-radius: 8px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-main { background-color: var(--primary-btn); color: white; }
+        .btn-sub { background-color: #6c757d; color: white; }
+        .btn-outline { background-color: transparent; border: 2px solid var(--border-color); color: #666; font-size: 0.9rem; }
+
+        /* 1ページ目：グリッド */
+        .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .btn-quick { background: var(--quick-btn); border: 2px solid var(--border-color); padding: 15px 10px; border-radius: 8px; font-weight: bold; cursor: pointer; text-align: center; }
+        .btn-quick span { display: block; font-size: 0.75rem; color: #777; font-weight: normal; }
+
+        /* 5ページ目：履歴フィルタ */
+        .filter-tab { display: flex; gap: 5px; margin-bottom: 15px; }
+        .btn-tab { flex: 1; padding: 10px; font-size: 0.8rem; background: #eee; border-radius: 4px; margin: 0; }
+        .btn-tab.active { background: var(--primary-btn); color: white; }
+        
+        .history-scroll { height: 250px; overflow-y: auto; border: 1px solid #eee; border-radius: 6px; background: #fff; }
+        .history-item { padding: 12px; border-bottom: 1px solid #f1f1f1; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; }
+        .item-date { font-size: 0.7rem; color: #999; display: block; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header" id="pageTitle">我慢を登録</div>
+    
+    <div class="content">
+        <div id="page1">
+            <div class="quick-grid" id="quickButtonsArea"></div>
+            <button class="btn-main" onclick="showPage('page5')" style="background:#007bff; margin-bottom: 10px;">📊 履歴を詳しく見る</button>
+            <button class="btn-sub" onclick="showPage('page3')">集計・進捗</button>
+            <button class="btn-outline" onclick="showPage('page4')">ボタンの設定</button>
+        </div>
+
+        <div id="page2" class="hidden" style="text-align: center;">
+            <div style="font-size: 5rem; color: var(--primary-btn); margin: 20px 0;">✔️</div>
+            <h2 id="saveMsgTitle">登録完了</h2>
+            <p id="saveMsgBody" style="color: #666;"></p>
+            <button class="btn-main" onclick="showPage('page1')">続けて登録</button>
+            <button class="btn-sub" onclick="showPage('page5')">履歴を確認</button>
+        </div>
+
+        <div id="page3" class="hidden">
+            <div style="background:#f8f9fa; padding:20px; border-radius:8px; text-align:center; border:1px solid #ddd; margin-bottom:20px;">
+                <span style="font-size:0.9rem; color:#666;">累計貯金額</span>
+                <span style="display:block; font-size:2.2rem; font-weight:bold; color:var(--primary-btn);" id="grandTotal">0円</span>
+            </div>
+            <button class="btn-sub" onclick="showPage('page1')">戻る</button>
+        </div>
+
+        <div id="page4" class="hidden">
+            <input type="text" id="newBtnName" placeholder="名前" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:6px; box-sizing:border-box;">
+            <input type="number" id="newBtnAmount" placeholder="金額" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:6px; box-sizing:border-box;">
+            <button class="btn-main" onclick="addQuickButton()">追加</button>
+            <div id="manageListArea" style="margin-top:20px;"></div>
+            <button class="btn-sub" onclick="showPage('page1')">戻る</button>
+        </div>
+
+        <div id="page5" class="hidden">
+            <div class="filter-tab">
+                <button class="btn-tab active" id="tabDay" onclick="renderHistory('day')">今日</button>
+                <button class="btn-tab" id="tabWeek" onclick="renderHistory('week')">1週間</button>
+                <button class="btn-tab" id="tabMonth" onclick="renderHistory('month')">1ヶ月</button>
+            </div>
+            
+            <div class="history-scroll" id="historyListArea">
+                </div>
+
+            <div style="margin-top:15px; text-align:right; font-weight:bold;">
+                期間合計: <span id="periodTotal" style="color:var(--primary-btn); font-size:1.2rem;">0</span>円
+            </div>
+
+            <button class="btn-sub" onclick="showPage('page1')" style="margin-top:20px;">メインに戻る</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let total = parseInt(localStorage.getItem('mySavingTotal')) || 0;
+    let history = JSON.parse(localStorage.getItem('mySavingHistory')) || [];
+    let quickButtons = JSON.parse(localStorage.getItem('myQuickButtons')) || [
+        { name: 'スタバ', amount: 650 },
+        { name: 'コンビニ', amount: 300 }
+    ];
+
+    function showPage(pageId) {
+        document.querySelectorAll('.content > div').forEach(div => div.classList.add('hidden'));
+        document.getElementById(pageId).classList.remove('hidden');
+        
+        const titles = { page1:"我慢登録", page2:"完了", page3:"集計", page4:"設定", page5:"履歴一覧" };
+        document.getElementById('pageTitle').innerText = titles[pageId];
+
+        if(pageId === 'page1') renderQuickButtons();
+        if(pageId === 'page3') document.getElementById('grandTotal').innerText = total.toLocaleString() + "円";
+        if(pageId === 'page4') renderManageList();
+        if(pageId === 'page5') renderHistory('day'); // デフォルトは今日
+    }
+
+    /* 履歴フィルタリングロジック */
+    function renderHistory(period) {
+        // タブのアクティブ表示切り替え
+        document.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+        if(period === 'day') document.getElementById('tabDay').classList.add('active');
+        if(period === 'week') document.getElementById('tabWeek').classList.add('active');
+        if(period === 'month') document.getElementById('tabMonth').classList.add('active');
+
+        const now = new Date();
+        let filtered = [];
+
+        if (period === 'day') {
+            filtered = history.filter(i => new Date(i.timestamp).toDateString() === now.toDateString());
+        } else if (period === 'week') {
+            const oneWeekAgo = now.getTime() - (7 * 24 * 60 * 60 * 1000);
+            filtered = history.filter(i => i.timestamp >= oneWeekAgo);
+        } else if (period === 'month') {
+            const oneMonthAgo = now.getTime() - (30 * 24 * 60 * 60 * 1000);
+            filtered = history.filter(i => i.timestamp >= oneMonthAgo);
+        }
+
+        const area = document.getElementById('historyListArea');
+        const periodTotal = filtered.reduce((s, i) => s + i.amount, 0);
+        document.getElementById('periodTotal').innerText = periodTotal.toLocaleString();
+
+        area.innerHTML = filtered.map(i => `
+            <div class="history-item">
+                <div>
+                    <span class="item-date">${new Date(i.timestamp).toLocaleString('ja-JP', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
+                    <span style="font-weight:bold;">${i.name}</span>
+                </div>
+                <div style="color:var(--primary-btn); font-weight:bold;">+${i.amount}円</div>
+            </div>
+        `).join('') || '<p style="text-align:center; color:#ccc; margin-top:50px;">記録がありません</p>';
+    }
+
+    /* 共通処理 */
+    function renderQuickButtons() {
+        const area = document.getElementById('quickButtonsArea');
+        area.innerHTML = quickButtons.map(btn => `
+            <div class="btn-quick" onclick="saveData('${btn.name}', ${btn.amount})">
+                ${btn.name}<span>${btn.amount}円</span>
+            </div>
+        `).join('');
+    }
+
+    function saveData(name, amount) {
+        total += amount;
+        history.unshift({ name, amount, timestamp: new Date().getTime() });
+        localStorage.setItem('mySavingTotal', total);
+        localStorage.setItem('mySavingHistory', JSON.stringify(history));
+        document.getElementById('saveMsgBody').innerText = `${name} (${amount}円)`;
+        showPage('page2');
+    }
+
+    function renderManageList() {
+        const area = document.getElementById('manageListArea');
+        area.innerHTML = quickButtons.map((btn, idx) => `
+            <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
+                <span>${btn.name}</span>
+                <button onclick="deleteBtn(${idx})" style="width:auto; padding:5px 10px; margin:0; background:#dc3545; color:#fff; font-size:0.7rem;">削除</button>
+            </div>
+        `).join('');
+    }
+
+    function addQuickButton() {
+        const n = document.getElementById('newBtnName').value;
+        const a = parseInt(document.getElementById('newBtnAmount').value);
+        if(!n || !a) return;
+        quickButtons.push({name:n, amount:a});
+        localStorage.setItem('myQuickButtons', JSON.stringify(quickButtons));
+        showPage('page4');
+    }
+
+    function deleteBtn(idx) {
+        quickButtons.splice(idx, 1);
+        localStorage.setItem('myQuickButtons', JSON.stringify(quickButtons));
+        renderManageList();
+    }
+
+    showPage('page1');
+</script>
+</body>
+</html>
